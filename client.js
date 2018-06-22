@@ -116,8 +116,8 @@ var client = function () {
 		}
 	}
 	if (system.Mac) {
-		if (/Mac OS X (\d+(_|\.)\d+[^;]*)/.test(ua)) {
-			system.Mac = RegExp.$1.replace("_", ".");
+		if (/Mac OS X (\d+(_|\.)\d+[^;)]*)/.test(ua)) {
+			system.Mac = RegExp.$1.replace(/_/g, ".");
 		}
 	}
 	//识别移动设备
