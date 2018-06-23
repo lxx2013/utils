@@ -126,7 +126,7 @@ var client = function () {
 	device.iPad = ua.indexOf("iPad") > -1;
 	system.iOS = device.iPad || device.iPhone || device.iPod;
 	//检测 iOS 版本
-	if (system.Mac && ua.indexOf("Mobile") > -1) {
+	if (ua.indexOf("Mobile") > -1) {
 		if (/CPU (?:iPhone )?OS (\d+_\d+)/.test(ua)) {
 			system.iOS = RegExp.$1.replace("_", ".");
 		} else {
@@ -149,6 +149,7 @@ var client = function () {
 		engine: engine,
 		browser: browser,
 		system: system,
+		device:device,
 		toString() {
 			var str = "操作系统:";
 			for (var i in system) {
