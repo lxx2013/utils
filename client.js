@@ -96,7 +96,7 @@ var client = function () {
 	system.Win = p.indexOf("Win") == 0;
 	system.Mac = p.indexOf("Mac") == 0;
 	system.Linux = (p.indexOf("X11") == 0) || (p.indexOf("Linux") == 0);
-	if (system.win) {
+	if (system.Win) {
 		if (/Win(?:dows )?([^do]{2})\s?(\d+\.\d+)?/.test(ua)) {
 			if (RegExp.$1 == "NT") {
 				let versions = {
