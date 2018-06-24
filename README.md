@@ -29,4 +29,4 @@ document.body.append(sss)
 使用:
 `emoji["joy"]`  得到😂
 [Demo](http://utils.setsuna.wang)
-[sm.ms](https://i.loli.net/2018/06/24/5b2f98fcc2903.png)
+![sm.ms](https://i.loli.net/2018/06/24/5b2f98fcc2903.png)
