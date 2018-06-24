@@ -107,11 +107,11 @@ var client = function () {
 					"6.4": "10",
 					"10.0": "10"
 				};
-				system.win = versions[RegExp.$2]
+				system.Win = versions[RegExp.$2]
 			} else if (RegExp.$1 == "9x") {
-				system.win = "ME";
+				system.Win = "ME";
 			} else {
-				system.win = RegExp.$1;
+				system.Win = RegExp.$1;
 			}
 		}
 	}
@@ -136,7 +136,7 @@ var client = function () {
 	}
 	//检测 Android 版本
 	if (/Android (\d+\.\d+)/.test(ua)) {
-		system.android = parseFloat(RegExp.$1);
+		system.Android = parseFloat(RegExp.$1);
 	}
 	//NokiaN
 	system.nokiaN = ua.indexOf("NokiaN") > -1;
