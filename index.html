@@ -4,13 +4,79 @@
 <head>
 	<meta charset="UTF-8">
 	<title>utils</title>
+	<script src="https://cdn.bootcss.com/vue/2.5.16/vue.js"></script>
+	<!-- 引入样式 -->
+	<link href="https://cdn.bootcss.com/element-ui/2.4.0/theme-chalk/index.css" rel="stylesheet">
+	<!-- 引入组件库 -->
+	<script src="https://cdn.bootcss.com/element-ui/2.4.0/index.js"></script>
+	<style>
+		.string {
+			color: #b24b36;
+		}
+	</style>
 </head>
 
 <body>
+	<div id="app">
+		<el-collapse v-model="activeName" accordion>
+			<el-collapse-item title="client.js 客户端检测" name="1">
+				<div class="string">"UA": {{ua}}</div>
+				<div>{{client}}</div>
+			</el-collapse-item>
+			<el-collapse-item title="emoji.js" name="2">
+				<el-autocomplete class="inline-input" v-model="state2" :fetch-suggestions="querySearch" placeholder="请输入emoji名字" :trigger-on-focus="true" @select="handleSelect">
+					<i class="el-icon-edit el-input__icon" slot="suffix" >
+					</i>
+					<template slot-scope="{ item }">
+						{{item.name}}
+						<span style="float: right;">{{item.value}}</span>
+					</template>
+				</el-autocomplete>
+			</el-collapse-item>
+			
+		</el-collapse>
+	</div>
+
 
 </body>
+
 <script src="client.js"></script>
+<script src="emoji.js"></script>
 <script>
-	document.write(client().toString());
+	new Vue({
+		el: '#app',
+		data() {
+			return {
+				ua: navigator.userAgent,
+				client: client().toString(),
+				activeName: "2",
+				state2: '',
+				emoji_array: []
+			}
+		},
+		computed: {
+
+		},
+		methods: {
+			handleSelect(item) {
+				console.log(item);
+				//this.state2 = item.real_value;
+			},
+			querySearch(queryString, cb) {
+				var results = queryString ? this.emoji_array.filter((x) => x.name.toLowerCase().indexOf(queryString.toLowerCase()) > -1) : this.emoji_array;
+				// 调用 callback 返回建议列表的数据
+				cb(results);
+			}
+		},
+		mounted() {
+			for (var i in emoji) {
+				this.emoji_array.push({
+					"name": i,
+					"value":  emoji[i] 
+				});
+			}
+			console.log(this.emoji_array[0], this.emoji_array[100])
+		}
+	});
 </script>
 </html>
