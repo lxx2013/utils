@@ -36,7 +36,8 @@ document.body.append(sss)
 ## 附录: jQuery 到 JS 转换
 ```js
 $('#el')         			|   	el.querySelector("div")    
-    					|	div.querySelectorAll('.el')
+    					|	div.querySelectorAll('.el') 
+    						//getElementsByTagName 得到的是HTMLCollection,它返回的值会动态改变.参见Javascript 高级程序设计设计第284页.而 querySelectorAll 不会有这种情况发生.
 //兄弟元素
 $('#el').parent()			|   	el.parentNode
 $('#el').prev()  			|	el.previousElementSibling
