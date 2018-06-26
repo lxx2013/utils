@@ -29,10 +29,10 @@ document.body.append(sss)
 使用:
 `emoji["joy"]`  得到😂
 [Demo](http://utils.setsuna.wang)
-![sm.ms](https://i.loli.net/2018/06/24/5b2f98fcc2903.png
+![sm.ms](https://i.loli.net/2018/06/24/5b2f98fcc2903.png)
 
 
-
+---
 ## 附录: jQuery 到 JS 转换
 ```js
 $('#el')         			|   	el.querySelector("div")    
@@ -72,8 +72,8 @@ console.log(o1);  // { a: 1, b: 2, c: 3 }, 注意目标对象自身也会改变�
 
 //数组过滤操作
 list.filter(x => x>=5)
-list.slice(s,end+1)  | list.slice(-list.length)
-list.findIndex(x => x==4)  | list.indexOf(4)
+list.slice(s,end+1)  			| list.slice(-list.length)
+list.findIndex(x => x==4)  		| list.indexOf(4)
 
 // get
 var xhr = new XMLHttpRequest();
