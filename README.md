@@ -35,10 +35,10 @@ document.body.append(sss)
 
 ## 附录: jQuery 到 JS 转换
 ```js
-$('#el')         			|   el.querySelector("div")    
-|	div.querySelectorAll('.el')
+$('#el')         			|   	el.querySelector("div")    
+    					|	div.querySelectorAll('.el')
 //兄弟元素
-$('#el').parent()			|   el.parentNode
+$('#el').parent()			|   	el.parentNode
 $('#el').prev()  			|	el.previousElementSibling
 $('#el').next()				|	el.nextElementSibling 
 $('#el').last()				|	el.lastElementChild
