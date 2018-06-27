@@ -40,13 +40,19 @@ $('#el')         			|   	el.querySelector("div")
     						//getElementsByTagName 得到的是HTMLCollection,它返回的值会动态改变.参见Javascript 高级程序设计设计第284页.而 querySelectorAll 不会有这种情况发生.
 //兄弟元素
 $('#el').parent()			|   	el.parentNode
+    					|	el.children[0]
 $('#el').prev()  			|	el.previousElementSibling
 $('#el').next()				|	el.nextElementSibling 
 $('#el').last()				|	el.lastElementChild
-$('#el').first()			|	el.children[0]
+$('#el').first()			| 	el.firstElementChild
 $('.el').append(div) 			|	el.appendChild(document.createElement('div'))
 $('.el').clone()			|	el.cloneNode(true)
 $('.el').remove()			|	el.parentNode.removeChild(el)
+    					|       //新增DOM 操作
+    					|	el.insertAdjacentHTML("beforebegin","<p>h</p>")
+					|	el.insertAdjacentHTML("afterbegin","<p>h</p>")
+					|	el.insertAdjacentHTML("beforeend","<p>h</p>")
+					|	el.insertAdjacentHTML("afterend","<p>h</p>")
 
 //获取文本
 $('#el').html()				|	el.innerHTML
