@@ -13,33 +13,37 @@
 		.string {
 			color: #b24b36;
 		}
-
 	</style>
 </head>
 
 <body>
 	<div id="app">
-		<el-collapse v-model="activeName" accordion>
-			<el-collapse-item title="client.js 客户端检测" name="1">
-				<div class="string">"UA": {{ua}}</div>
-				<div>{{client}}</div>
-			</el-collapse-item>
-			<el-collapse-item title="emoji.js" name="2">
-				<el-autocomplete class="inline-input" v-model="state2" :fetch-suggestions="querySearch" placeholder="请输入emoji名字" :trigger-on-focus="true" @select="handleSelect">
-					<i class="el-icon-edit el-input__icon" slot="suffix" >
+		<el-row>
+			<el-col :span="24">
+				<el-collapse v-model="activeName" accordion>
+					<el-collapse-item title="client.js 客户端检测" name="1">
+						<div class="string">"UA": {{ua}}</div>
+						<div>{{client}}</div>
+					</el-collapse-item>
+					<el-collapse-item title="emoji.js" name="2">
+						<el-autocomplete class="inline-input" v-model="state2" :fetch-suggestions="querySearch" placeholder="请输入emoji名字" :trigger-on-focus="true" @select="handleSelect">
+							<i class="el-icon-edit el-input__icon" slot="suffix">
 					</i>
-					<template slot-scope="{ item }">
+							<template slot-scope="{ item }">
 						{{item.name}}
 						<span style="float: right;">{{item.value}}</span>
 					</template>
-				</el-autocomplete>
-			</el-collapse-item>
-			<el-collapse-item title="rotate.js" name="3">
-				<img id="arrow" src="https://i.loli.net/2018/07/09/5b435b10890cd.jpg" alt="amadeus">
-				<div>iphone.alpha:{{iphone.alpha}}<br>iphone.beta:{{iphone.beta}}<br>iphone.gamma:{{iphone.gamma}}</div>
-			</el-collapse-item>
-			
-		</el-collapse>
+						</el-autocomplete>
+					</el-collapse-item>
+					<el-collapse-item title="rotate.js" name="3">
+						<img id="arrow" src="https://i.loli.net/2018/07/09/5b435b10890cd.jpg" alt="amadeus">
+						<div id="arrow_str"></div>
+					</el-collapse-item>
+
+				</el-collapse>
+			</el-col>
+		</el-row>
+
 	</div>
 
 
@@ -58,11 +62,9 @@
 				activeName: "3",
 				state2: '',
 				emoji_array: [],
-				iphone:window.iphone
 			}
 		},
 		computed: {
-
 		},
 		methods: {
 			handleSelect(item) {
@@ -75,11 +77,14 @@
 				cb(results);
 			}
 		},
+		watch:{
+
+		},
 		mounted() {
 			for (var i in emoji) {
 				this.emoji_array.push({
 					"name": i,
-					"value":  emoji[i] 
+					"value": emoji[i]
 				});
 			}
 			console.log(this.emoji_array[0], this.emoji_array[100])
