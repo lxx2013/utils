@@ -31,6 +31,9 @@ document.body.append(sss)
 [Demo](http://utils.setsuna.wang)
 ![sm.ms](https://i.loli.net/2018/06/24/5b2f98fcc2903.png)
 
+## 3. iphone.js 手机设备的API即时显示
+- rotate
+- touch
 
 ---
 ## 附录: jQuery 到 JS 转换

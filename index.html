@@ -13,6 +13,7 @@
 		.string {
 			color: #b24b36;
 		}
+
 	</style>
 </head>
 
@@ -33,6 +34,10 @@
 					</template>
 				</el-autocomplete>
 			</el-collapse-item>
+			<el-collapse-item title="rotate.js" name="3">
+				<img id="arrow" src="https://i.loli.net/2018/07/09/5b435b10890cd.jpg" alt="amadeus">
+				<div>iphone.alpha:{{iphone.alpha}}<br>iphone.beta:{{iphone.beta}}<br>iphone.gamma:{{iphone.gamma}}</div>
+			</el-collapse-item>
 			
 		</el-collapse>
 	</div>
@@ -42,6 +47,7 @@
 
 <script src="client.js"></script>
 <script src="emoji.js"></script>
+<script src="iphone.js"></script>
 <script>
 	new Vue({
 		el: '#app',
@@ -49,9 +55,10 @@
 			return {
 				ua: navigator.userAgent,
 				client: client().toString(),
-				activeName: "2",
+				activeName: "3",
 				state2: '',
-				emoji_array: []
+				emoji_array: [],
+				iphone:window.iphone
 			}
 		},
 		computed: {
