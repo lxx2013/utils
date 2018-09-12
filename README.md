@@ -1,6 +1,27 @@
 # utils
 # 供CDN方式调用的工具代码
 
+## 0. 字符串 hash.js
+```js
+String.prototype.hashCode = function (caseSensitive) {
+  var str = caseSensitive ? this : this.toLowerCase();
+  // 1315423911=b'1001110011001111100011010100111'
+  var hash = 1315423911, i, ch;
+  for (i = str.length - 1; i >= 0; i--) {
+    ch = str.charCodeAt(i);
+    hash ^= ((hash << 5) + ch + (hash >> 2));
+  }
+  return (hash & 0x7FFFFFFF);
+};
+```
+经过下列测试输出576, 比[ stackoverflow 前2个答案](https://stackoverflow.com/questions/7616461/generate-a-hash-from-string-in-javascript)的300+的结果要好,应该是使用了大素数的原因
+```js
+var b = {}
+for (var i = 0; i < 900; i++) {
+  b[i.toString().hashCode() % 900] = i;
+}
+console.log(Object.keys(b).length);
+```
 ## 1. client.js 客户端检测
 
 *对应 Javascript 高级程序设计第9章*
