@@ -1,7 +1,6 @@
 var iphone = {};
 (function(){
 	var alpha,beta,gamma;
-	var iphone = {}
 	window.addEventListener("deviceorientation", function (e) {
 		[iphone.alpha,iphone.beta,iphone.gamma] = [e.alpha,e.beta,e.gamma];
 		var arrow = document.getElementById("arrow_str");
