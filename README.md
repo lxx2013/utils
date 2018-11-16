@@ -56,6 +56,10 @@ document.body.append(sss)
 - rotate
 - touch
 
+## 4. jianshu-index.js 给简书增加一个目录
+>参考自[http://www.jianshu.com/u/c887880e8f06](http://www.jianshu.com/u/c887880e8f06)
+>在他基础上增加了不少效果
+
 ---
 ## 附录: jQuery 到 JS 转换
 ```js
