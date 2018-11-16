@@ -19,8 +19,8 @@ function appendMenuItem(tagName, id, content) {
     let paddingLeft = i * 10; //添加标题缩进
     let weights = [700, 600, 500, 400, 400, 400];
     let sizes = ['24px', '20px', '18px', '16px', '14px', '12px']
-    $('#menu_nav_ol').append(`<li class="${id}" style="padding-left:${paddingLeft}px;">
-                                <b style="font-weight:${weights[i]}; font-size:${sizes[i]};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+    $('#menu_nav_ol').append(`<li class="${id}" style="padding-left:${paddingLeft}px;overflow:hidden;text-overflow:ellipsis;">
+                                <b  class="${tagName}" style="font-weight:${weights[i]}; font-size:${sizes[i]};white-space:nowrap;">
                                    ${content}
                                 </b>
                               </li>`);
@@ -82,8 +82,11 @@ function appendMenuItem(tagName, id, content) {
         // 设置 hover 高亮样式
         var nums = document.styleSheets.length;
         var position = document.styleSheets[nums - 1].cssRules.length
-        document.styleSheets[nums - 1].insertRule(`#menu_nav_ol li:hover b{color:${highlightColor};cursor:pointer;}`, position++);
-        document.styleSheets[nums - 1].insertRule(`#menu_nav_ol .active {color:${highlightColor};}`, position++);
+        document.styleSheets[nums - 1].insertRule(`#menu_nav_ol li:hover b{ border-bottom: 2px solid ${highlightColor};cursor:pointer;}`, position++);
+        document.styleSheets[nums - 1].insertRule(`#menu_nav_ol .active {color:${highlightColor};font-weight: 600;}`, position++);
+        document.styleSheets[nums - 1].insertRule(`#menu_nav_ol .h1 {font-weight: 600;color: #2c3e50;font-size:1.17em}`, position++);
+        document.styleSheets[nums - 1].insertRule(`#menu_nav_ol .h2 {color: #7f8c8d;font-size:1em;}`, position++);
+        document.styleSheets[nums - 1].insertRule(`#menu_nav_ol .h3 {color:${highlightColor};}`, position++);
     }
     catch (err) {
         console.log('[目录插件] 设置 hover 样式 Error\n', err)
