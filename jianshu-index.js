@@ -1,94 +1,262 @@
 // ==UserScript==
-// @name         简书目录
-// @description:zh-cn 自动生成简书目录
-// @namespace    http://www.jianshu.com/u/c887880e8f06
-// @version      1.0
-// @description  create content
-// @author       Wonder233
+// @name         自己的目录插件测试
+// @namespace    http://tampermonkey.net/
+// @version      0.2
+// @description  try to take over the world!
+// @author       You
 // @match        http://www.jianshu.com/p/*
 // @match        https://www.jianshu.com/p/*
-//// @require      http://code.jquery.com/jquery-latest.js
 // @grant        none
 // ==/UserScript==
-var menuIndex = 0; //初始化标题索引
-var highlightColor = "#c7254e";
-// 在侧边栏中添加目录项
-function appendMenuItem(tagName, id, content) {
-    console.log(tagName + " " + tagName.substring(1));
-    let i = tagName.substring(1)
-    let paddingLeft = i * 10; //添加标题缩进
-    let weights = [700, 600, 500, 400, 400, 400];
-    let sizes = ['24px', '20px', '18px', '16px', '14px', '12px']
-    $('#menu_nav_ol').append(`<li class="${id}" style="padding-left:${paddingLeft}px;overflow:hidden;text-overflow:ellipsis;">
-                                <b  class="${tagName}" style="font-weight:${weights[i]}; font-size:${sizes[i]};white-space:nowrap;">
-                                   ${content}
-                                </b>
-                              </li>`);
-}
 
 (function () {
     'use strict';
-    // 使文章区域宽度适配屏幕
-    let wider = $('.note').width() - 400;
-    let oriWidth = $('.post').width();
-    console.log(wider);
-    console.log(oriWidth);
-    if (wider < oriWidth) {
-        wider = oriWidth;
-    }
-    // 适配宽度
-    $('.post').width(wider);
-
-    // 保存标题元素
-    let titles = $('body').find('h1,h2,h3,h4,h5,h6');
-    if (titles.length === 0) {
-        return;
-    }
-    // 将文章内容右移
-    $('.post').css('padding-left', '200px');
-    // 在 body 标签内部添加 aside 侧边栏,用于显示文档目录
-    let contentHeight = window.innerHeight; //设置目录高度
-    let asideContent = '<aside id="sideMenu" style="position: fixed;padding: 80px 15px 20px 15px;top: 0;left: 0;margin-bottom:20px;background-color: #eee;background-color: #eee;z-index: 810;overflow: scroll;max-height:' + contentHeight + 'px;min-height:' + contentHeight + 'px;min-width:350px;max-width:350px;"><h2>目录<h2></aside>';
-    $('.show-content').prepend(asideContent);
-    $('#sideMenu').append('<ol id="menu_nav_ol" style="list-style:none;margin:0px;padding:0px;">');// 不显示 li 项前面默认的点标志, 也不使用默认缩进
-
-    // 遍历文章中的所有标题行, 按需添加id值, 并增加记录到目录列表中
-    titles.each(function () {
-        let tagName = $(this)[0].tagName.toLocaleLowerCase();
-        let content = $(this).text();
-        // 若标题的id不存在,则使用新id
-        let newTagId = $(this).attr('id');
-        if (!$(this).attr('id')) {
-            newTagId = 'id_' + menuIndex;
-            $(this).attr('id', newTagId);
-            menuIndex++;
-        }
-        if (newTagId !== 'id_0') //忽略标题
-            appendMenuItem(tagName, newTagId, content);
-    });
-
-    $('#sideMenu').append('</ol>');
-    // 绑定目录li点击事件,点击时跳转到对应的位置
-    $('#menu_nav_ol li').on('click', function () {
-        let targetId = $(this).attr('class');
-        $("#" + targetId)[0].scrollIntoView({ behavior: 'smooth' });
-    });
-    window.onscroll = function () {
-        if (window.scrollY + document.body.clientHeight / 2 >= $('#id_15')[0].offsetTop) {
-
-        }
-    }
-    try {
-        // 设置 hover 高亮样式
-        var nums = document.styleSheets.length;
-        var position = document.styleSheets[nums - 1].cssRules.length
-        document.styleSheets[nums - 1].insertRule(`#menu_nav_ol li:hover b{ border-bottom: 2px solid ${highlightColor};cursor:pointer;}`, position++);
-        document.styleSheets[nums - 1].insertRule(`#menu_nav_ol .active {color:${highlightColor};font-weight: 600;}`, position++);
-        document.styleSheets[nums - 1].insertRule(`#menu_nav_ol .h1 {font-weight: 600;color: #2c3e50;font-size:1.17em}`, position++);
-        document.styleSheets[nums - 1].insertRule(`#menu_nav_ol .h2 {color: #7f8c8d;font-size:1em;}`, position++);
-        document.styleSheets[nums - 1].insertRule(`#menu_nav_ol .h3 {color:${highlightColor};}`, position++);
-    }
-    catch (err) {
-        console.log('[目录插件] 设置 hover 样式 Error\n', err)
-    }
+    initSidebar('.sidebar', '.post');
 })();
+
+/**
+* 简书网站左侧目录生成插件
+* 代码参考了 https://github.com/vuejs/vuejs.org/blob/master/themes/vue/source/js/common.js
+* @param {string} sidebarQuery - 目录 Element 的 query 字符串 
+* @param {string} contentQuery - 正文 Element 的 query 字符串
+*/
+function initSidebar(sidebarQuery, contentQuery) {
+    addAllStyle()
+    var body = document.body
+    var sidebar = document.querySelector(sidebarQuery)
+    // 在 body 标签内部添加 div.sidebar 侧边栏,用于显示文档目录
+    if (!sidebar) {
+        sidebar = document.createElement('div')
+        body.insertBefore(sidebar, body.firstChild)
+    }
+    sidebar.classList.add('sidebar')
+    var content = document.querySelector(contentQuery)
+    if (!content) {
+        throw ('Error: content not find!')
+        return
+    }
+    content.classList.add('content-with-sidebar');
+    var ul = document.createElement('ul')
+    ul.classList.add('menu-root')
+    sidebar.appendChild(ul)
+
+    var allHeaders = []
+    // 遍历文章中的所有 h1或 h2(取决于最大的 h 是多大) , 编辑为li.h3插入 ul
+    var i = 1
+    var headers = content.querySelectorAll('h' + i++)
+    while (!headers.length) {
+        headers = content.querySelectorAll('h' + i++)
+    }
+    if (headers.length) {
+        [].forEach.call(headers, function (h) {
+            var h1 = makeLink(h, 'a','h1-link')
+            ul.appendChild(h1)
+            allHeaders.push(h)
+            //寻找h1的子标题
+            var h2s = collectHs(h)
+            if (h2s.length) {
+                [].forEach.call(h2s, function (h2) {
+                    allHeaders.push(h2)
+                    h2 = makeLink(h2, 'a', 'h2-link')
+                    ul.appendChild(h2)
+                    //再寻找 h2 的子标题 h3
+                    var h3s = collectHs(h2)
+                    if (h3s.length) {
+                        var subUl = document.createElement('ul')
+                        subUl.classList.add('menu-sub')
+                        h2.appendChild(subUl)
+                            ;[].forEach.call(h3s, function (h3) {
+                                allHeaders.push(h3)
+                                h3 = makeLink(h3, 'a', 'h3-link')
+                                subUl.appendChild(h3)
+                            })
+                    }
+                })
+            }
+        })
+    }
+    //增加 click 点击处理,使用 scrollIntoView
+    sidebar.addEventListener('click', function (e) {
+        e.preventDefault()
+        if (e.target.href) {
+            //setActive(e.target,sidebar)
+            var target = document.getElementById(e.target.getAttribute('href').slice(1))
+            target.scrollIntoView({ behavior: 'smooth' })
+        }
+    })
+    //监听窗口的滚动事件
+    window.addEventListener('scroll', updateSidebar)
+    window.addEventListener('resize', updateSidebar)
+    function updateSidebar() {
+        var doc = document.documentElement
+        var top = doc && doc.scrollTop || document.body.scrollTop
+        if (!allHeaders.length) return
+        var last
+        for (var i = 0; i < allHeaders.length; i++) {
+            var link = allHeaders[i]
+            if (link.offsetTop > (top+document.body.clientHeight/3)) {
+                if (!last){ last = link }
+                break
+            } else {
+                last = link
+            }
+        }
+        if (last)
+            setActive(last.id,sidebar)
+    }
+}
+
+/**
+>为正文的标题创建一个对应的锚,返回的节点格式为`<li><tag class="className"> some text </tag><li>`
+@param {HTMLElement} h - 需要在目录中为其创建链接的一个标题,它的`NodeType`可能为`H1 | H2 | H3`
+@param {string} tag - 返回的 li 中的节点类型, 默认为 a
+@param {string} className - 返回的 tag 的 class ,默认为空
+@returns {HTMLElement} 返回的节点格式为`<li><a> some text </a><li>`
+*/
+function makeLink(h, tag, className) {
+    tag = tag || 'a'
+    className = className || ''
+    var link = document.createElement('li')
+    var text = [].slice.call(h.childNodes).map(function (node) {
+        if (node.nodeType === Node.TEXT_NODE) {
+            return node.nodeValue
+        } else if (['CODE', 'SPAN'].indexOf(node.tagName) !== -1) {
+            return node.textContent
+        } else {
+            return ''
+        }
+    }).join('').replace(/\(.*\)$/, '')
+    if (!h.id) h.id = text.replace(/\s/, '_')
+    link.innerHTML =
+        `<${tag} class="${className}" href="#${h.id}">${htmlEscape(text)}</${tag}>`
+    return link
+}
+/**
+>HTML 特殊字符[ &, ", ', <, > ]转义
+@param {string} text - HTML特殊字符
+@returns {string} 转义后的字符,例如`<`被转义为`&lt`
+*/
+function htmlEscape(text) {
+    return text
+        .replace(/&/g, '&amp;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+}
+/**
+>为一个 `h(x)`标题节点收集跟在它屁股后面的 `h(x+1)`标题节点
+@param {HTMLElement}  h - HTML 标题节点
+@returns {Array} 一个由 h(x+1)节点组成的数组
+*/
+function collectHs(h) {
+    var h3s = []
+    var thisTag = h.tagName
+    var childTag = h.tagName[0] + (parseInt(h.tagName[1]) + 1)
+    var next = h.nextSibling
+    while (next && next.tagName !== thisTag) {
+        if (next.tagName === childTag) {
+            h3s.push(next)
+        }
+        next = next.nextSibling
+    }
+    return h3s
+}
+/**
+>未知
+@param {small}  h - HTML特殊字符
+@param {Array} h3s - 由 h3 节点组成的数组
+*/
+function setActive(id,sidebar) {
+    var previousActives = sidebar.querySelectorAll('.active')
+    ;[].forEach.call(previousActives,function(h){
+        h.classList.remove('active')
+    })
+    var currentActive = typeof id === 'string'
+        ? sidebar.querySelector('a[href="#' + id + '"]')
+        : id
+    currentActive.classList.add('active')
+}
+/**
+>增加 sidebar 需要的全部样式
+@param {string} highlightColor - 高亮颜色, 默认为'#c7254e'
+*/
+function addAllStyle(highlightColor) {
+    var nums = document.styleSheets.length;
+    var position = document.styleSheets[nums - 1].cssRules.length
+    highlightColor = highlightColor || "#c7254e"
+    addStyle(`.sidebar{position:fixed;    z-index: 10;
+        top: 61px;
+        left: 0;
+        bottom: 0;
+        overflow-x: hidden;
+        overflow-y: auto;
+        padding: 40px 20px 60px 30px;
+        max-width: 280px;
+    }`)
+    addStyle(`.menu-root { list-style:none; text-align:left }`)
+    addStyle(`.menu-root .h1-link{
+        color:rgb(44, 62, 80);
+        display:block;
+        font-family:"source sans pro", "helvetica neue", Arial, sans-serif;
+        font-size:17.55px;
+        font-weight:600;
+        height:22px;
+        line-height:22.5px;
+        list-style-type:none;
+        margin-block-end:17.55px;
+        margin-block-start:17.55px;
+    }`)
+    addStyle(`.menu-root .h2-link{
+        color:rgb(127,140,141);
+        cursor:pointer;
+        font-family:"source sans pro", "helvetica neue", Arial, sans-serif;
+        font-size:15px;
+        height:auto;
+        line-height:22.5px;
+        list-style-type:none;
+        text-align:left;
+        text-decoration-color:rgb(127, 140, 141);
+        text-decoration-line:none;
+        text-decoration-style:solid;
+        padding-left:12.5px;
+    }`)
+    addStyle(`.menu-sub {
+        padding-left:25px;
+    }`)
+    addStyle(`.menu-sub .h3-link{
+        color:rgb(52, 73, 94);
+        cursor:pointer;
+        display:inline;
+        font-family:"source sans pro", "helvetica neue", Arial, sans-serif;
+        font-size:12.75px;
+        height:auto;
+        line-height:19.125px;
+        list-style-type:none;
+        text-align:left;
+        text-decoration-color:rgb(52, 73, 94);
+        text-decoration-line:none;
+        text-decoration-style:solid;
+    }`)
+    if (document.body.clientWidth<= 1300) {
+        addStyle(`
+        .content-with-sidebar {
+            margin-left:310px !important;
+        }
+    `)
+    }
+    addStyle(`.sidebar .active{
+        color:${highlightColor};
+    }`)
+
+
+
+
+    /**
+    >添加一条 css 规则
+    @param {string} str - css样式
+    */
+    function addStyle(str) {
+        document.styleSheets[nums - 1].insertRule(str, position++);
+    }
+}
