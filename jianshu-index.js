@@ -49,7 +49,7 @@ function initSidebar(sidebarQuery, contentQuery) {
     }
     if (headers.length) {
         [].forEach.call(headers, function (h) {
-            var h1 = makeLink(h, 'a','h1-link')
+            var h1 = makeLink(h, 'a', 'h1-link')
             ul.appendChild(h1)
             allHeaders.push(h)
             //寻找h1的子标题
@@ -57,10 +57,10 @@ function initSidebar(sidebarQuery, contentQuery) {
             if (h2s.length) {
                 [].forEach.call(h2s, function (h2) {
                     allHeaders.push(h2)
+                    var h3s = collectHs(h2)
                     h2 = makeLink(h2, 'a', 'h2-link')
                     ul.appendChild(h2)
                     //再寻找 h2 的子标题 h3
-                    var h3s = collectHs(h2)
                     if (h3s.length) {
                         var subUl = document.createElement('ul')
                         subUl.classList.add('menu-sub')
@@ -75,34 +75,43 @@ function initSidebar(sidebarQuery, contentQuery) {
             }
         })
     }
-    //增加 click 点击处理,使用 scrollIntoView
+    //增加 click 点击处理,使用 scrollIntoView,增加控制滚动的 flag
+    var scrollFlag = 0 
     sidebar.addEventListener('click', function (e) {
         e.preventDefault()
         if (e.target.href) {
-            //setActive(e.target,sidebar)
+            scrollFlag = 1
+            setTimeout(()=>scrollFlag = 0,1000)
+            setActive(e.target,sidebar)
             var target = document.getElementById(e.target.getAttribute('href').slice(1))
-            target.scrollIntoView({ behavior: 'smooth' })
+            target.scrollIntoView({ behavior: 'smooth', block: "center" })
+            if ([].indexOf.call(e.target.classList, 'h2-link') != -1) {
+                setActive(e.target, sidebar, 'current')
+            }
         }
     })
     //监听窗口的滚动事件
     window.addEventListener('scroll', updateSidebar)
     window.addEventListener('resize', updateSidebar)
     function updateSidebar() {
+        if(scrollFlag)
+            return 
         var doc = document.documentElement
         var top = doc && doc.scrollTop || document.body.scrollTop
         if (!allHeaders.length) return
         var last
         for (var i = 0; i < allHeaders.length; i++) {
             var link = allHeaders[i]
-            if (link.offsetTop > (top+document.body.clientHeight/3)) {
-                if (!last){ last = link }
+            if (link.offsetTop > (top + document.body.clientHeight / 2 - 73)) {
+                if (!last) { last = link }
                 break
             } else {
                 last = link
             }
         }
-        if (last)
-            setActive(last.id,sidebar)
+        if (last) {
+            setActive(last.id, sidebar)
+        }
     }
 }
 
@@ -126,10 +135,21 @@ function makeLink(h, tag, className) {
             return ''
         }
     }).join('').replace(/\(.*\)$/, '')
-    if (!h.id) h.id = text.replace(/\s/, '_')
+    if (!h.id) h.id = IdEscape(text)
     link.innerHTML =
         `<${tag} class="${className}" href="#${h.id}">${htmlEscape(text)}</${tag}>`
     return link
+}
+
+/**
+*>对 id 进行格式化.
+*>注意：id值使用字符时，除了 ASCII字母和数字、“—”、“-"、"."之外，可能会引起兼容性问题，因为在HTML4中是不允许包含这些字符的，这个限制在HTML5中更加严格，为了兼容性id值必须由字母开头,同时不允许其中有空格。参考https://developer.mozilla.org/zh-CN/docs/Web/HTML/Global_attributes/id
+*>但是本程序中使用了 document.getElementById 的要求稍放宽了一些,"#3.1_createComponent"这样的 id能成功执行
+@param {string} text - HTML特殊字符
+@returns {string} 转义后的字符,例如`<`被转义为`&lt`
+*/
+function IdEscape(text) {
+    return text.replace(/[\s"']/g, '_') //注意这里不加 g 的话就会只匹配第一个匹配,所以会出错
 }
 /**
 >HTML 特殊字符[ &, ", ', <, > ]转义
@@ -167,15 +187,23 @@ function collectHs(h) {
 @param {small}  h - HTML特殊字符
 @param {Array} h3s - 由 h3 节点组成的数组
 */
-function setActive(id,sidebar) {
-    var previousActives = sidebar.querySelectorAll('.active')
-    ;[].forEach.call(previousActives,function(h){
-        h.classList.remove('active')
-    })
+function setActive(id, sidebar, className) {
+    className = className || 'active'
+    var previousActives = sidebar.querySelectorAll(`.${className}`)
+        ;[].forEach.call(previousActives, function (h) {
+            h.classList.remove(className)
+        })
     var currentActive = typeof id === 'string'
         ? sidebar.querySelector('a[href="#' + id + '"]')
         : id
-    currentActive.classList.add('active')
+    currentActive.classList.add(className)
+    if([].indexOf.call(currentActive.classList,'h3-link') != -1){
+        var parent = currentActive
+        while (parent && parent.tagName != 'UL'){
+            parent = parent.parentNode
+        }
+        setActive(parent.parentNode.querySelector('.h2-link'),sidebar,'current')
+    }
 }
 /**
 >增加 sidebar 需要的全部样式
@@ -192,12 +220,11 @@ function addAllStyle(highlightColor) {
         overflow-x: hidden;
         overflow-y: auto;
         padding: 40px 20px 60px 30px;
-        max-width: 280px;
+        max-width: 310px;
     }`)
     addStyle(`.menu-root { list-style:none; text-align:left }`)
     addStyle(`.menu-root .h1-link{
         color:rgb(44, 62, 80);
-        display:block;
         font-family:"source sans pro", "helvetica neue", Arial, sans-serif;
         font-size:17.55px;
         font-weight:600;
@@ -207,7 +234,14 @@ function addAllStyle(highlightColor) {
         margin-block-end:17.55px;
         margin-block-start:17.55px;
     }`)
+    addStyle(`.menu-root .h2-link:hover {
+        border-bottom: 2px solid ${highlightColor};
+    }`)
+    addStyle(`.menu-root .h2-link.current+.menu-sub{
+        display:block;
+    }`)
     addStyle(`.menu-root .h2-link{
+        display:block;
         color:rgb(127,140,141);
         cursor:pointer;
         font-family:"source sans pro", "helvetica neue", Arial, sans-serif;
@@ -219,13 +253,15 @@ function addAllStyle(highlightColor) {
         text-decoration-color:rgb(127, 140, 141);
         text-decoration-line:none;
         text-decoration-style:solid;
-        padding-left:12.5px;
+        margin-left:12.5px;
     }`)
     addStyle(`.menu-sub {
         padding-left:25px;
+        list-style:none;
+        display:none;
     }`)
     addStyle(`.menu-sub .h3-link{
-        color:rgb(52, 73, 94);
+        color:#333333;
         cursor:pointer;
         display:inline;
         font-family:"source sans pro", "helvetica neue", Arial, sans-serif;
@@ -238,7 +274,7 @@ function addAllStyle(highlightColor) {
         text-decoration-line:none;
         text-decoration-style:solid;
     }`)
-    if (document.body.clientWidth<= 1300) {
+    if (document.body.clientWidth <= 1300) {
         addStyle(`
         .content-with-sidebar {
             margin-left:310px !important;
@@ -247,6 +283,7 @@ function addAllStyle(highlightColor) {
     }
     addStyle(`.sidebar .active{
         color:${highlightColor};
+        font-weight:700;
     }`)
 
 
