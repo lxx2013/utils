@@ -77,11 +77,13 @@ function initSidebar(sidebarQuery, contentQuery) {
     }
     //增加 click 点击处理,使用 scrollIntoView,增加控制滚动的 flag
     var scrollFlag = 0 
+    var scrollFlagTimer 
     sidebar.addEventListener('click', function (e) {
         e.preventDefault()
         if (e.target.href) {
             scrollFlag = 1
-            setTimeout(()=>scrollFlag = 0,1000)
+            clearTimeout(scrollFlagTimer)
+            scrollFlagTimer = setTimeout(()=>scrollFlag = 0,1500)
             setActive(e.target,sidebar)
             var target = document.getElementById(e.target.getAttribute('href').slice(1))
             target.scrollIntoView({ behavior: 'smooth', block: "center" })
