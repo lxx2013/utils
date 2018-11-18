@@ -85,9 +85,6 @@ function initSidebar(sidebarQuery, contentQuery) {
             setActive(e.target,sidebar)
             var target = document.getElementById(e.target.getAttribute('href').slice(1))
             target.scrollIntoView({ behavior: 'smooth', block: "center" })
-            if ([].indexOf.call(e.target.classList, 'h2-link') != -1) {
-                setActive(e.target, sidebar, 'current')
-            }
         }
     })
     //监听窗口的滚动事件
@@ -183,26 +180,36 @@ function collectHs(h) {
     return h3s
 }
 /**
->未知
+>无论对h2还是 h3进行操作,首先都要移除所有的 active 和 current 类, 然后对 h2添加 active 和 current, 或对 h3添加 active 对其父目录添加 current
 @param {small}  h - HTML特殊字符
 @param {Array} h3s - 由 h3 节点组成的数组
 */
-function setActive(id, sidebar, className) {
-    className = className || 'active'
-    var previousActives = sidebar.querySelectorAll(`.${className}`)
-        ;[].forEach.call(previousActives, function (h) {
-            h.classList.remove(className)
-        })
+function setActive(id, sidebar) {
+    //1.无论对h2还是 h3进行操作,首先都要移除所有的 active 和 current 类, 
+    var previousActives = sidebar.querySelectorAll(`.active`)
+    ;[].forEach.call(previousActives, function (h) {
+        h.classList.remove('active')
+    })
+    previousActives = sidebar.querySelectorAll(`.current`)
+    ;[].forEach.call(previousActives, function (h) {
+        h.classList.remove('current')
+    })
+    //获取要操作的目录节点
     var currentActive = typeof id === 'string'
         ? sidebar.querySelector('a[href="#' + id + '"]')
         : id
-    currentActive.classList.add(className)
+    if (currentActive.classList.contains('h2-link') != -1) {
+        //2. 若为 h2,则添加 active 和 current
+        currentActive.classList.add('active','current')
+    }
     if([].indexOf.call(currentActive.classList,'h3-link') != -1){
+        //3. 若为 h3,则添加 active 且对其父目录添加 current
+        currentActive.classList.add('active')
         var parent = currentActive
         while (parent && parent.tagName != 'UL'){
             parent = parent.parentNode
         }
-        setActive(parent.parentNode.querySelector('.h2-link'),sidebar,'current')
+        parent.parentNode.querySelector('.h2-link').classList.add('current','active')
     }
 }
 /**
@@ -224,6 +231,7 @@ function addAllStyle(highlightColor) {
     }`)
     addStyle(`.menu-root { list-style:none; text-align:left }`)
     addStyle(`.menu-root .h1-link{
+        display:block;
         color:rgb(44, 62, 80);
         font-family:"source sans pro", "helvetica neue", Arial, sans-serif;
         font-size:17.55px;
@@ -241,7 +249,6 @@ function addAllStyle(highlightColor) {
         display:block;
     }`)
     addStyle(`.menu-root .h2-link{
-        display:block;
         color:rgb(127,140,141);
         cursor:pointer;
         font-family:"source sans pro", "helvetica neue", Arial, sans-serif;
