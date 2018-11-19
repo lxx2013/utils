@@ -45,11 +45,11 @@ function initSidebar(sidebarQuery, contentQuery) {
     //因为标题一定是 h1 所以优先处理,然后再看文章正文部分是以 h1作为一级标题还是 h2或 h3作为一级标题
     //采用的方法是优先遍历正文, 然后再插入标题这个h1
     var i = 1
-    var headers = [].slice.call(content.querySelectorAll('h' + i++),1)
-    while (!headers.length && i <=6 ) {
+    var headers = [].slice.call(content.querySelectorAll('h' + i++), 1)
+    while (!headers.length && i <= 6) {
         headers = Array.from(content.querySelectorAll('h' + i++))
     }
-    [].unshift.call(headers,content.querySelector('h1'))
+    [].unshift.call(headers, content.querySelector('h1'))
     if (headers.length) {
         [].forEach.call(headers, function (h) {
             var h1 = makeLink(h, 'a', 'h1-link')
@@ -79,15 +79,15 @@ function initSidebar(sidebarQuery, contentQuery) {
         })
     }
     //增加 click 点击处理,使用 scrollIntoView,增加控制滚动的 flag
-    var scrollFlag = 0 
-    var scrollFlagTimer 
+    var scrollFlag = 0
+    var scrollFlagTimer
     sidebar.addEventListener('click', function (e) {
         e.preventDefault()
         if (e.target.href) {
             scrollFlag = 1
             clearTimeout(scrollFlagTimer)
-            scrollFlagTimer = setTimeout(()=>scrollFlag = 0,1500)
-            setActive(e.target,sidebar)
+            scrollFlagTimer = setTimeout(() => scrollFlag = 0, 1500)
+            setActive(e.target, sidebar)
             var target = document.getElementById(e.target.getAttribute('href').slice(1))
             target.scrollIntoView({ behavior: 'smooth', block: "center" })
         }
@@ -96,8 +96,8 @@ function initSidebar(sidebarQuery, contentQuery) {
     window.addEventListener('scroll', updateSidebar)
     window.addEventListener('resize', updateSidebar)
     function updateSidebar() {
-        if(scrollFlag)
-            return 
+        if (scrollFlag)
+            return
         var doc = document.documentElement
         var top = doc && doc.scrollTop || document.body.scrollTop
         if (!allHeaders.length) return
@@ -131,7 +131,7 @@ function makeLink(h, tag, className) {
     var text = [].slice.call(h.childNodes).map(function (node) {
         if (node.nodeType === Node.TEXT_NODE) {
             return node.nodeValue
-        } else if (['CODE', 'SPAN','A'].indexOf(node.tagName) !== -1) {
+        } else if (['CODE', 'SPAN', 'A'].indexOf(node.tagName) !== -1) {
             return node.textContent
         } else {
             return ''
@@ -177,12 +177,11 @@ function collectHs(h) {
     var childIndexes = []
     var thisTag = h.tagName
     var count = 1
-    do{ 
+    do {
         var childTag = h.tagName[0] + (parseInt(h.tagName[1]) + count++)
         var next = h.nextElementSibling
         while (next) {
-            if (next.tagName[0] == 'H' && next.tagName[1] <= thisTag[1])
-            {
+            if (next.tagName[0] == 'H' && next.tagName[1] <= thisTag[1]) {
                 break
             }
             else if (next.tagName === childTag) {
@@ -191,7 +190,7 @@ function collectHs(h) {
             next = next.nextElementSibling
         }
     } while (childTag < 'H6' && childIndexes.length == 0)
-    return  childIndexes
+    return childIndexes
 }
 /**
 >无论对h2还是 h3进行操作,首先都要移除所有的 active 和 current 类, 然后对 h2添加 active 和 current, 或对 h3添加 active 对其父目录添加 current
@@ -201,29 +200,29 @@ function collectHs(h) {
 function setActive(id, sidebar) {
     //1.无论对h2还是 h3进行操作,首先都要移除所有的 active 和 current 类, 
     var previousActives = sidebar.querySelectorAll(`.active`)
-    ;[].forEach.call(previousActives, function (h) {
-        h.classList.remove('active')
-    })
+        ;[].forEach.call(previousActives, function (h) {
+            h.classList.remove('active')
+        })
     previousActives = sidebar.querySelectorAll(`.current`)
-    ;[].forEach.call(previousActives, function (h) {
-        h.classList.remove('current')
-    })
+        ;[].forEach.call(previousActives, function (h) {
+            h.classList.remove('current')
+        })
     //获取要操作的目录节点
     var currentActive = typeof id === 'string'
         ? sidebar.querySelector('a[href="#' + id + '"]')
         : id
     if (currentActive.classList.contains('h2-link') != -1) {
         //2. 若为 h2,则添加 active 和 current
-        currentActive.classList.add('active','current')
+        currentActive.classList.add('active', 'current')
     }
-    if([].indexOf.call(currentActive.classList,'h3-link') != -1){
+    if ([].indexOf.call(currentActive.classList, 'h3-link') != -1) {
         //3. 若为 h3,则添加 active 且对其父目录添加 current
         currentActive.classList.add('active')
         var parent = currentActive
-        while (parent && parent.tagName != 'UL'){
+        while (parent && parent.tagName != 'UL') {
             parent = parent.parentNode
         }
-        parent.parentNode.querySelector('.h2-link').classList.add('current','active')
+        parent.parentNode.querySelector('.h2-link').classList.add('current', 'active')
     }
 }
 /**
@@ -231,9 +230,24 @@ function setActive(id, sidebar) {
 @param {string} highlightColor - 高亮颜色, 默认为'#c7254e'
 */
 function addAllStyle(highlightColor) {
-    var nums = document.styleSheets.length;
-    var position = document.styleSheets[nums - 1].cssRules.length
     highlightColor = highlightColor || "#c7254e"
+    var sheet = newStyleSheet()
+    function newStyleSheet() {
+        var style = document.createElement("style");
+        // 对WebKit hack :(
+        style.appendChild(document.createTextNode(""));
+        // 将 <style> 元素加到页面中
+        document.head.appendChild(style);
+        return style.sheet;
+    }
+    var position = 0
+    /**
+    >添加一条 css 规则
+    @param {string} str - css样式
+    */
+    function addStyle(str) {
+        sheet.insertRule(str,position++);
+    }
     addStyle(`.sidebar{position:fixed;    z-index: 10;
         top: 61px;
         left: 0;
@@ -295,24 +309,13 @@ function addAllStyle(highlightColor) {
         text-decoration-line:none;
         text-decoration-style:solid;
     }`)
-    if (document.body.clientWidth <= 1300) {
-        addStyle(`
+    addStyle(`@media only screen and (max-width : 1300px){
         .content-with-sidebar {
             margin-left:310px !important;
         }
-    `)
-    }
+    }`)
     addStyle(`.sidebar .active{
         color:${highlightColor};
         font-weight:700;
     }`)
-
-
-    /**
-    >添加一条 css 规则
-    @param {string} str - css样式
-    */
-    function addStyle(str) {
-        document.styleSheets[nums - 1].insertRule(str, position++);
-    }
 }
