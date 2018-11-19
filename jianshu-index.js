@@ -1,9 +1,9 @@
 // ==UserScript==
-// @name         自己的目录插件测试
+// @name         简书网站左侧目录生成
 // @namespace    http://tampermonkey.net/
-// @version      0.2
-// @description  try to take over the world!
-// @author       You
+// @version      1.0.0
+// @description  简书网站左侧目录生成,支持非h1标题,支持滚动
+// @author       https://github.com/lxx2013
 // @match        http://www.jianshu.com/p/*
 // @match        https://www.jianshu.com/p/*
 // @grant        none
@@ -92,7 +92,7 @@ function initSidebar(sidebarQuery, contentQuery) {
             target.scrollIntoView({ behavior: 'smooth', block: "center" })
         }
     })
-    //监听窗口的滚动事件
+    //监听窗口的滚动和缩放事件
     window.addEventListener('scroll', updateSidebar)
     window.addEventListener('resize', throttle(updateSidebar))
     function updateSidebar() {
@@ -144,11 +144,11 @@ function makeLink(h, tag, className) {
 }
 
 /**
-*>对 id 进行格式化.
+*对 id 进行格式化.把空白字符和引号转义为下划线
 *>注意：id值使用字符时，除了 ASCII字母和数字、“—”、“-"、"."之外，可能会引起兼容性问题，因为在HTML4中是不允许包含这些字符的，这个限制在HTML5中更加严格，为了兼容性id值必须由字母开头,同时不允许其中有空格。参考https://developer.mozilla.org/zh-CN/docs/Web/HTML/Global_attributes/id
 *>但是本程序中使用了 document.getElementById 的要求稍放宽了一些,"#3.1_createComponent"这样的 id能成功执行
 @param {string} text - HTML特殊字符
-@returns {string} 转义后的字符,例如`<`被转义为`&lt`
+@returns {string} 转义后的字符串,例如`# 1'2"3标题`被转义为`#_1_2_3标题`
 */
 function IdEscape(text) {
     return text.replace(/[\s"']/g, '_') //注意这里不加 g 的话就会只匹配第一个匹配,所以会出错
@@ -167,11 +167,11 @@ function htmlEscape(text) {
         .replace(/>/g, '&gt;')
 }
 /**
->为一个 `h(x)`标题节点收集跟在它屁股后面的 `h(x+1)`标题节点,
+*为一个 `h(x)`标题节点收集跟在它屁股后面的 `h(x+1)`标题节点,
 >若屁股后面没有`h(x+1)`节点,则收集`h(x+2)`节点甚至`h(x+3)`,毕竟不知道文章作者喜欢用哪种大小做标题
 >收集过程中若遇到 `h(x)或h(x-1)`节点的话要立即返回
-@param {HTMLElement}  h - HTML 标题节点 H1~H6
-@returns {Array} 一个由 h(x+1)或 h(x+2)等后代目录节点组成的数组
+@param {HTMLElement}  h - HTML 标题节点 `H1~H6`
+@returns {HTMLElement[]} 一个由 h(x+1)或 h(x+2)等后代目录节点组成的数组
 */
 function collectHs(h) {
     var childIndexes = []
@@ -193,9 +193,10 @@ function collectHs(h) {
     return childIndexes
 }
 /**
->无论对h2还是 h3进行操作,首先都要移除所有的 active 和 current 类, 然后对 h2添加 active 和 current, 或对 h3添加 active 对其父目录添加 current
-@param {small}  h - HTML特殊字符
-@param {Array} h3s - 由 h3 节点组成的数组
+*设置目录的激活状态,按既定规则添加 active 和 current 类
+*>无论对h2还是 h3进行操作,首先都要移除所有的 active 和 current 类, 然后对 h2添加 active 和 current, 或对 h3添加 active 对其父目录添加 current
+@param {String|HTMLElement}  id - HTML标题节点或 querySelector 字符串
+@param {HTMLElement} sidebar - 边栏的 HTML 节点
 */
 function setActive(id, sidebar) {
     //1.无论对h2还是 h3进行操作,首先都要移除所有的 active 和 current 类, 
@@ -234,6 +235,10 @@ function setActive(id, sidebar) {
 function addAllStyle(highlightColor) {
     highlightColor = highlightColor || "#c7254e"
     var sheet = newStyleSheet()
+    /**
+    >创建一个新的`<style></style>`标签插入`<head>`中
+    @return {Object} style.sheet,`它具有方法insertRule`
+    */
     function newStyleSheet() {
         var style = document.createElement("style");
         // 对WebKit hack :(
@@ -245,7 +250,7 @@ function addAllStyle(highlightColor) {
     var position = 0
     /**
     >添加一条 css 规则
-    @param {string} str - css样式
+    @param {string} str - css样式,也可以是@media
     */
     function addStyle(str) {
         sheet.insertRule(str,position++);
@@ -321,6 +326,11 @@ function addAllStyle(highlightColor) {
         font-weight:700;
     }`)
 }
+/**
+>函数节流
+>参考https://juejin.im/entry/58c0379e44d9040068dc952f
+@param {Fuction} fn - 要执行的函数
+*/
 function throttle(fn, interval = 300) {
     let canRun = true;
     return function () {
