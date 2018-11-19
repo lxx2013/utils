@@ -59,6 +59,14 @@ document.body.append(sss)
 ## 4. jianshu-index.js 给简书增加一个目录
 >参考自[http://www.jianshu.com/u/c887880e8f06](http://www.jianshu.com/u/c887880e8f06)
 >在他基础上增加了不少效果
+- 点击锚点滚动效果
+- 页面滚动时更改目录中高亮标签
+- 支持三级标题
+- 在文章正文中没找到 h1 时继续递归向后找 h2 \ h3
+
+效果:
+
+![](https://i.loli.net/2018/11/19/5bf2a7e66405b.gif)
 
 ---
 ## 附录: jQuery 到 JS 转换
