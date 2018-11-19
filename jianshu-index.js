@@ -94,7 +94,7 @@ function initSidebar(sidebarQuery, contentQuery) {
     })
     //监听窗口的滚动事件
     window.addEventListener('scroll', updateSidebar)
-    window.addEventListener('resize', updateSidebar)
+    window.addEventListener('resize', throttle(updateSidebar))
     function updateSidebar() {
         if (scrollFlag)
             return
@@ -320,4 +320,15 @@ function addAllStyle(highlightColor) {
         color:${highlightColor};
         font-weight:700;
     }`)
+}
+function throttle(fn, interval = 300) {
+    let canRun = true;
+    return function () {
+        if (!canRun) return;
+        canRun = false;
+        setTimeout(() => {
+            fn.apply(this, arguments);
+            canRun = true;
+        }, interval);
+    };
 }
