@@ -42,11 +42,14 @@ function initSidebar(sidebarQuery, contentQuery) {
 
     var allHeaders = []
     // 遍历文章中的所有 h1或 h2(取决于最大的 h 是多大) , 编辑为li.h3插入 ul
+    //因为标题一定是 h1 所以优先处理,然后再看文章正文部分是以 h1作为一级标题还是 h2或 h3作为一级标题
+    //采用的方法是优先遍历正文, 然后再插入标题这个h1
     var i = 1
-    var headers = content.querySelectorAll('h' + i++)
-    while (!headers.length) {
-        headers = content.querySelectorAll('h' + i++)
+    var headers = [].slice.call(content.querySelectorAll('h' + i++),1)
+    while (!headers.length && i <=6 ) {
+        headers = Array.from(content.querySelectorAll('h' + i++))
     }
+    [].unshift.call(headers,content.querySelector('h1'))
     if (headers.length) {
         [].forEach.call(headers, function (h) {
             var h1 = makeLink(h, 'a', 'h1-link')
@@ -164,22 +167,31 @@ function htmlEscape(text) {
         .replace(/>/g, '&gt;')
 }
 /**
->为一个 `h(x)`标题节点收集跟在它屁股后面的 `h(x+1)`标题节点
-@param {HTMLElement}  h - HTML 标题节点
-@returns {Array} 一个由 h(x+1)节点组成的数组
+>为一个 `h(x)`标题节点收集跟在它屁股后面的 `h(x+1)`标题节点,
+>若屁股后面没有`h(x+1)`节点,则收集`h(x+2)`节点甚至`h(x+3)`,毕竟不知道文章作者喜欢用哪种大小做标题
+>收集过程中若遇到 `h(x)或h(x-1)`节点的话要立即返回
+@param {HTMLElement}  h - HTML 标题节点 H1~H6
+@returns {Array} 一个由 h(x+1)或 h(x+2)等后代目录节点组成的数组
 */
 function collectHs(h) {
-    var h3s = []
+    var childIndexes = []
     var thisTag = h.tagName
-    var childTag = h.tagName[0] + (parseInt(h.tagName[1]) + 1)
-    var next = h.nextSibling
-    while (next && next.tagName !== thisTag) {
-        if (next.tagName === childTag) {
-            h3s.push(next)
+    var count = 1
+    do{ 
+        var childTag = h.tagName[0] + (parseInt(h.tagName[1]) + count++)
+        var next = h.nextElementSibling
+        while (next) {
+            if (next.tagName[0] == 'H' && next.tagName[1] <= thisTag[1])
+            {
+                break
+            }
+            else if (next.tagName === childTag) {
+                childIndexes.push(next)
+            }
+            next = next.nextElementSibling
         }
-        next = next.nextSibling
-    }
-    return h3s
+    } while (childTag < 'H6' && childIndexes.length == 0)
+    return  childIndexes
 }
 /**
 >无论对h2还是 h3进行操作,首先都要移除所有的 active 和 current 类, 然后对 h2添加 active 和 current, 或对 h3添加 active 对其父目录添加 current
@@ -233,7 +245,7 @@ function addAllStyle(highlightColor) {
     }`)
     addStyle(`.menu-root { list-style:none; text-align:left }`)
     addStyle(`.menu-root .h1-link{
-        display:block;
+        display:inline-block;
         color:rgb(44, 62, 80);
         font-family:"source sans pro", "helvetica neue", Arial, sans-serif;
         font-size:17.55px;
@@ -241,8 +253,8 @@ function addAllStyle(highlightColor) {
         height:22px;
         line-height:22.5px;
         list-style-type:none;
-        margin-block-end:17.55px;
-        margin-block-start:17.55px;
+        margin-block-end:11px;
+        margin-block-start:11px;
     }`)
     addStyle(`.menu-root .h2-link:hover {
         border-bottom: 2px solid ${highlightColor};
