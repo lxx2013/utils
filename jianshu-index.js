@@ -128,7 +128,7 @@ function makeLink(h, tag, className) {
     var text = [].slice.call(h.childNodes).map(function (node) {
         if (node.nodeType === Node.TEXT_NODE) {
             return node.nodeValue
-        } else if (['CODE', 'SPAN'].indexOf(node.tagName) !== -1) {
+        } else if (['CODE', 'SPAN','A'].indexOf(node.tagName) !== -1) {
             return node.textContent
         } else {
             return ''
@@ -294,8 +294,6 @@ function addAllStyle(highlightColor) {
         color:${highlightColor};
         font-weight:700;
     }`)
-
-
 
 
     /**
