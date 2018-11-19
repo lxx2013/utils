@@ -224,6 +224,8 @@ function setActive(id, sidebar) {
         }
         parent.parentNode.querySelector('.h2-link').classList.add('current', 'active')
     }
+    //左侧目录太长时的效果
+    currentActive.scrollIntoView({ behavior: 'smooth' })
 }
 /**
 >增加 sidebar 需要的全部样式
